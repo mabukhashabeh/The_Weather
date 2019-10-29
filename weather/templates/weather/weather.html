@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>The Weather</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.css"/>
+</head>
+
+<body>
+<section class="hero is-primary">
+    <div class="hero-body">
+        <div class="container">
+            <h1 class="title">
+                What's the weather like?
+            </h1>
+        </div>
+    </div>
+</section>
+<section class="section">
+    <div class="container">
+        <div class="columns">
+            <div class="column is-offset-4 is-4">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="field has-addons">
+                        <div class="control is-expanded">
+                            {{ form }}
+                        </div>
+                        <div class="control">
+                            <button type="submit" class="button is-info">
+                                Search
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="section">
+    <div class="container">
+        <div class="columns">
+            <div class="column is-offset-4 is-4">
+                {% if not city.not_found %}
+
+                    <div class="box">
+                        <article class="media">
+                            <div class="media-left">
+                                <figure class="image is-50x50">
+                                    <img src="http://openweathermap.org/img/w/{{ city.icon }}.png" alt="Image">
+                                </figure>
+                            </div>
+                            <div class="media-content">
+                                <div class="content">
+                                    <p>
+                                        <span class="title">{{ city.name|title }}</span>
+                                        <br>
+                                        <span class="subtitle">{{ city.temp }}° F</span>
+                                        <br>
+                                    </p>
+                                    <marquee>{{ city.description }}</marquee>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                    <p>Requested at : {% now "jS F Y H:i:s a" %}</p>
+                {% else %}
+                    <article class="message is-danger">
+                        <div class="message-header">
+                            <p>Not Found</p>
+                            <button class="delete" aria-label="delete"></button>
+                        </div>
+                        <div class="message-body">
+                            City Requested<strong> Not Found</strong></div>
+                    </article>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</section>
+<footer class="footer">
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"
+        integrity="sha256-T0Vest3yCU7pafRw9r+settMBX6JkKN06dqBnpQ8d30="
+        crossorigin="anonymous"></script>
+<script>
+
+    $(function () {
+        $('input[id="id_name"]').keyup(function () {
+            var city = $('input[id="id_name"]').val()
+            $.ajax({
+                type: 'GET',
+                url: '/weather/?city=' + city,
+                success: function (data) {
+                    var selectItem = function (event, ui) {
+                        $("input#id_name").val(ui.item.value);
+                        return false;
+                    }
+
+                    $("input#id_name").autocomplete({
+                        source: data,
+                        select: selectItem,
+                    });
+                },
+
+            })
+        })
+    })
+</script>
+</body>
+
+</html>
